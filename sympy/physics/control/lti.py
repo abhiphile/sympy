@@ -1861,7 +1861,22 @@ class Parallel(SISOLinearTimeInvariant):
     def __new__(cls, *args, evaluate=False):
 
         args = _flatten_args(args, Parallel)
-        cls._check_args(args)
+        # For StateSpace parallel connection
+        if args and any(isinstance(arg, StateSpace) or (hasattr(arg, 'is_StateSpace_object')
+                                    and arg.is_StateSpace_object) for arg in args):
+            # Check for SISO
+            if args[0].num_inputs == 1 and args[-1].num_outputs == 1:
+                # Check the interconnection
+                for i in range(1, len(args)):
+                    if args[i].num_inputs != args[i-1].num_outpus:
+                        raise ValueError(filldedent("""Systems with incompatible inputs and
+                        outputs cannot be connected in Parallel."""))
+                cls._is_parallel_StateSpace = True
+            else:
+                raise ValueError("To use Parallel connection for MIMO systems use MIMOParallel instead.")
+        else:
+            cls._is_parallel_StateSpace = False
+            cls._check_args(args)
         obj = super().__new__(cls, *args)
 
         return obj.doit() if evaluate else obj
@@ -1905,6 +1920,16 @@ class Parallel(SISOLinearTimeInvariant):
         TransferFunction((2 - s**3)*(-p + s) + (-a*p**2 - b*s)*(s**4 + 5*s + 6), (-p + s)*(s**4 + 5*s + 6), s)
 
         """
+        if self._is_parallel_StateSpace:
+            # Return the equivalent StateSpace model
+            res = self.args[0].doit()
+            if not isinstance(res, StateSpace):
+                res = res.rewrite(StateSpace)
+            for arg in self.args[1:]:
+                if not isinstance(arg, StateSpace):
+                    arg = arg.doit().rewrite(StateSpace)
+                res *= arg
+            return res
 
         _arg = (arg.doit().to_expr() for arg in self.args)
         res = Add(*_arg).as_numer_denom()
@@ -2018,6 +2043,9 @@ class Parallel(SISOLinearTimeInvariant):
 
         """
         return self.doit().is_biproper
+    @property
+    def is_StateSpace_object(self):
+        return self._is_parallel_StateSpace
 
 
 class MIMOParallel(MIMOLinearTimeInvariant):
