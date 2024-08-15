@@ -5,10 +5,14 @@ Control Package Examples
 =============================================
 
 Given below, are some comprehensive textbook examples to demonstrate the possible use cases
-of the Control Module.
+of the Control Module. This examples are based on the Transfer function approach and the
+Statespace approach.
+
+Transfer Function
+-----------------
 
 Example 1
----------
+^^^^^^^^^
 
         .. image:: Control_Problems_Q1.svg
 
@@ -75,7 +79,7 @@ Solution
     0
 
 Example 2
----------
+^^^^^^^^^
 
 Find the Transfer Function of the following Spring-Mass dampering system :
 
@@ -117,7 +121,7 @@ The **DIFFERENTIAL EQUATION** of the system will be as follows:
     c*s + k + m*s
 
 Example 3
----------
+^^^^^^^^^
 
 A signal matrix in the time-domain, also known as the *impulse response matrix* **g(t)** is given below.
 
@@ -205,7 +209,7 @@ Solution
 
 
 Example 4
----------
+^^^^^^^^^
 
 1. A system is designed by arranging **P(s)** and **C(s)** in a series configuration *(Values of P(s) and C(s) are provided below)*. Compute the equivalent system matrix, when the order of blocks is reversed *(i.e. C(s) then P(s))*.
 
@@ -289,7 +293,7 @@ Solution
 
 
 Example 5
----------
+^^^^^^^^^
 
         .. image:: Control_Problems_Q5.svg
 
@@ -349,6 +353,171 @@ Solution
 
 
 References
-----------
+^^^^^^^^^^
 1. `testbook.com <https://testbook.com/objective-questions/mcq-on-transfer-function--5eea6a1039140f30f369e952>`_
 2. `www.vssut.ac.in <https://www.vssut.ac.in/lecture_notes/lecture1423904331.pdf>`_
+
+Statespace approach
+-------------------
+The state-space approach is a powerful method used to model and analyze systems in control 
+theory. Instead of focusing solely on the input-output relationships like the transfer function 
+approach, the state-space approach represents systems as a set of first-order differential 
+equations.
+
+The state-space representation of a system can be written as:
+
+.. math::
+
+    \dot{x}(t) = A x(t) + B u(t) \\
+    y(t) = C x(t) + D u(t)
+
+
+Where :math:`x(t)` is the state vector, :math:`u(t)` is the input vector, :math:`y(t)` is the output vector,
+:math:`A`, :math:`B`, :math:`C`, and :math:`D` are matrices that define the system dynamics.
+
+Below are some examples to demonstrate the use of StateSpace in SymPy.
+
+Simple Electrical System
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+In a series RLC circuit, we have a resistor :math:`R`, an inductor :math:`L`, and a capacitor :math:`C` 
+connected in series with an input voltage :math:`v_{in}(t)`. The state variables are the current through 
+the inductor :math:`i(t)` and the voltage across the capacitor :math:`v_C(t)`.
+
+Applying **Kirchhoff's Voltage Law** (KVL) around the loop in the above diagram gives:
+
+.. math::
+
+    _{in}(t) = R \cdot i(t) + L \frac{di(t)}{dt} +  V_C(t)
+
+Where: :math:`V_{in}(t)` is the input voltage, :math:`i(t)` is the current through the inductor and
+:math:`V_C(t)` is the voltage across the capacitor.
+
+This equation relates the input voltage to the elements of the RLC circuit.
+
+**Capacitor Voltage Equation**
+
+The voltage across the capacitor can be related to the current by:
+
+.. math::
+
+    V_C(t) = \frac{1}{C} \int i(t) \, dt
+
+Taking the time derivative of both sides, we obtain the rate of change of the capacitor voltage:
+
+.. math::
+
+    \dot{v}_C(t) = \frac{d V_C(t)}{dt} = \frac{i(t)}{C}
+
+This equation shows that the rate of change of the capacitor voltage is proportional to the current through the circuit.
+
+From the KVL equation, solving for the derivative of the current gives:
+
+.. math::
+
+    \frac{di(t)}{dt} = -\frac{R}{L} i(t) - \frac{1}{L} V_C(t) + \frac{1}{L} V_{in}(t)
+
+This is the first-order differential equation that describes the rate of change of the current in terms of the circuit's components and input voltage.
+
+The state-space representation expresses the system in terms of state variables, which are typically the variables that describe the energy stored in the circuit elements (such as current and voltage).
+
+We define the state vector math:`( X(t) )` as:
+
+.. math::
+
+    X(t) = \begin{bmatrix} x_1(t) \\ x_2(t) \end{bmatrix} = \begin{bmatrix} i(t) \\ V_C(t) \end{bmatrix}
+
+Here math:`( x_1(t) = i(t) )` is the current through the inductor and math:`( x_2(t) = V_C(t) )` is the voltage across the capacitor.
+
+The input vector math:`( U(t) )` is the input voltage:
+
+.. math::
+
+    U(t) = V_{in}(t)
+
+The system of differential equations in terms of the state variables becomes:
+
+1. The derivative of the current:
+
+.. math::
+
+    \dot{x}_1(t) = -\frac{R}{L} x_1(t) - \frac{1}{L} x_2(t) + \frac{1}{L} V_{in}(t)
+
+2. The derivative of the capacitor voltage:
+
+.. math::
+
+    \dot{x}_2(t) = \frac{x_1(t)}{C}
+
+
+The matrices for the series RLC circuit are:
+
+.. math::
+
+    A = \begin{bmatrix}
+    -\frac{R}{L} & -\frac{1}{L} \\
+    \frac{1}{C} & 0
+    \end{bmatrix},
+    B = \begin{bmatrix}
+    \frac{1}{L} \\
+    0
+    \end{bmatrix},
+    C = \begin{bmatrix} 0 & 1 \end{bmatrix},
+    D = \begin{bmatrix} 0 \end{bmatrix}
+
+Thus, the state-space representation of the series RLC circuit is:
+
+.. math::
+
+    \dot{X}(t) = \begin{bmatrix}
+    -\frac{R}{L} & -\frac{1}{L} \\
+    \frac{1}{C} & 0
+    \end{bmatrix}
+    \begin{bmatrix} x_1(t) \\ x_2(t) \end{bmatrix}
+    + \begin{bmatrix}
+    \frac{1}{L} \\
+    0
+    \end{bmatrix} V_{in}(t)
+
+    Y(t) = \begin{bmatrix} 0 & 1 \end{bmatrix}
+    \begin{bmatrix} x_1(t) \\ x_2(t) \end{bmatrix}
+    + \begin{bmatrix} 0 \end{bmatrix} V_{in}(t)
+
+
+
+The state-space representation provides a compact way of modeling the series
+RLC circuit by using matrices to describe the system's dynamics. The
+matrices \( A \), \( B \), \( C \), and \( D \) capture the relationships
+between the circuit's state variables, input, and output. This representation
+is particularly useful for analyzing the system's behavior in the time
+domain and for designing control systems.
+
+Solution
+
+    >>> from sympy import Matrix, symbols
+    >>> from sympy.physics.control import StateSpace, TransferFunction
+    >>> R, L, C = symbols('R L C')
+    >>> A = Matrix([[-R/L, -1/L], [1/C, 0]])
+    >>> B = Matrix([[1/L], [0]])
+    >>> C = Matrix([[0, 1]])
+    >>> D = Matrix([[0]])
+    >>> ss = StateSpace(A, B, C, D)
+    >>> ss
+    StateSpace(
+    Matrix([
+    [-R/L, -1/L],
+    [ 1/C,    0]]),
+
+    Matrix([
+    [1/L],  
+    [  0]]),
+
+    Matrix([[0, 1]]),
+
+    Matrix([[0]]))
+    >>> # We can convert the StateSpace to TransferFunction by rewrite method.
+    >>> tf = ss.rewrite(TransferFunction)[0][0]
+
+References
+^^^^^^^^^^
+1. `bmsce.ac.in <https://bmsce.ac.in/Content/TE/STATE_SPACE_ANALYSIS.pdf>`_
