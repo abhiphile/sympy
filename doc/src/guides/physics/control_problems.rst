@@ -380,8 +380,11 @@ Where :math:`x(t)` is the state vector, :math:`u(t)` is the input vector, :math:
 Below are some examples to demonstrate the use of StateSpace in SymPy.
 
 
-Simple Electrical System
-^^^^^^^^^^^^^^^^^^^^^^^^
+Example 6
+^^^^^^^^^
+
+        .. image:: Control_Problems_Q6.svg
+           :align: center
 
 In a series RLC circuit, we have a resistor :math:`R`, an inductor :math:`L`, and a capacitor :math:`C` 
 connected in series with an input voltage :math:`v_{in}(t)`. The state variables are the current through 
@@ -391,7 +394,7 @@ Applying **Kirchhoff's Voltage Law** (KVL) around the loop in the above diagram 
 
         .. math::
 
-            _{in}(t) = R \cdot i(t) + L \frac{di(t)}{dt} +  V_C(t)
+            V_{in}(t) = R \cdot i(t) + L \frac{di(t)}{dt} +  V_C(t)
 
 Where: :math:`V_{in}(t)` is the input voltage, :math:`i(t)` is the current through the inductor and
 :math:`V_C(t)` is the voltage across the capacitor.
@@ -499,8 +502,8 @@ control systems.
 Solution
 
     >>> # Imports
-    >>> from sympy import Matrix, symbols
-    >>> from sympy.physics.control import StateSpace, TransferFunction
+    >>> from sympy import Matrix, symbols, pprint
+    >>> from sympy.physics.control import *
     >>> R, L, C = symbols('R L C')
     >>> A = Matrix([[-R/L, -1/L], [1/C, 0]])
     >>> B = Matrix([[1/L], [0]])
@@ -512,20 +515,25 @@ Solution
     Matrix([
     [-R/L, -1/L],
     [ 1/C,    0]]),
-
     Matrix([
     [1/L],  
     [  0]]),
-
     Matrix([[0, 1]]),
-
     Matrix([[0]]))
     >>> # We can convert the StateSpace to TransferFunction by rewrite method.
     >>> tf = ss.rewrite(TransferFunction)[0][0]
+    >>> pprint(tf)
+            1         
+    ──────────────────
+         2            
+    C⋅L⋅s  + C⋅R⋅s + 1
 
 
-Example 6
+Example 7
 ^^^^^^^^^
+
+        .. image:: Control_Problems_Q7.svg
+           :align: center
 
 Obtain the state model for a system represented by an electrical
 system as shown in figure
@@ -534,18 +542,15 @@ The system is modeled with two state variables,
 `x_1(t)` and `x_2(t)`, which are related to the physical voltages at the nodes
 `v_1(t)` and `v_2(t)` respectively.
 
-**State Variables:**
-
 Let the two state variables be defined as:
 
         .. math::
 
            v_1(t) = x_1(t)
+
            v_2(t) = x_2(t)
 
 The governing equations are derived by applying Kirchhoff's Current Law (KCL) at the nodes `v_1(t)` and `v_2(t)`.
-
-**KCL at Node `v_1(t)`:**
 
 Applying KCL at node `v_1(t)`:
 
@@ -571,7 +576,6 @@ Thus, the state equation for `x_1(t)` becomes:
 
            \dot{x_1}(t) = -\frac{2x_1(t)}{RC} + \frac{x_2(t)}{RC} + \frac{u(t)}{RC}
 
-**KCL at Node `v_2(t)`:**
 
 Applying KCL at node `v_2(t)`:
 
@@ -597,33 +601,29 @@ Thus, the state equation for `x_2(t)` becomes:
 
            \dot{x_2}(t) = \frac{x_1(t)}{RC} - \frac{x_2(t)}{RC}
 
-**State-Space Representation:**
-
 The state-space representation is given by the following matrix equation:
 
         .. math::
 
-           \begin{pmatrix}
+           \begin{bmatrix}
            \dot{x_1}(t) \\
            \dot{x_2}(t)
-           \end{pmatrix}
+           \end{bmatrix}
            =
-           \begin{pmatrix}
+           \begin{bmatrix}
            -\frac{2}{RC} & \frac{1}{RC} \\
            \frac{1}{RC} & -\frac{1}{RC}
-           \end{pmatrix}
-           \begin{pmatrix}
+           \end{bmatrix}
+           \begin{bmatrix}
            x_1(t) \\
            x_2(t)
-           \end{pmatrix}
+           \end{bmatrix}
            +
-           \begin{pmatrix}
+           \begin{bmatrix}
            \frac{1}{RC} \\
            0
-           \end{pmatrix}
+           \end{bmatrix}
            u(t)
-
-**Output Equation:**
 
 The output of the circuit is defined as:
 
@@ -635,11 +635,12 @@ Thus, the output equation can be written as:
 
         .. math::
 
-           y(t) = \begin{pmatrix} 0 & 1 \end{pmatrix} 
-           \begin{pmatrix}
+           y(t) = \begin{bmatrix} 0 & 1 \end{bmatrix}
+           \begin{bmatrix}
            x_1(t) \\
            x_2(t)
-           \end{pmatrix}
+           \end{bmatrix}
+
 
 Solution
 
@@ -656,13 +657,10 @@ Solution
     Matrix([
     [-2/(C*R),  1/(C*R)],
     [ 1/(C*R), -1/(C*R)]]),
-    
     Matrix([
     [1/(C*R)],
     [      0]]),
-    
     Matrix([[0, 1]]),
-    
     Matrix([[0]]))
 
 
